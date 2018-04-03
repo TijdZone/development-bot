@@ -1,49 +1,71 @@
 const Discord = require("discord.js");
-const client = new Discord.Client();
-const PREFIX = "!"
 
-client.on("ready", () => {
-  console.log(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
-  client.user.setGame(`Developing`);
-});
+const TOKEN = "NDMwNzE0MDA1NzU0MDg1Mzc2.DaUNgA.QoC6_9e4X6_BM5obqVfN4g4XGIc";
+const PREFIX = "!!";
 
-client.on("message", async message => {
-  const swearWords = ["darn", "shucks", "frak", "shite"];
-  if( swearWords.some(word => message.content.includes(word)) ) {
-    message.reply("Oh no you said a bad word!!!");
-  }
-  if(message.author.bot) return;
-
-  if(message.content.indexOf(config.prefix) !== 0) return;
+var bot = new Discord.Client();
 
 
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-  const command = args.shift().toLowerCase();
 
+
+bot.on("message", async message => {
+    if(message.author.bot) return;
+    if(message.channel.type === "dm") return;
+
+    let prefix = PREFIX.prefix;
+    let messageArray = message.content.split(" ");
+    let cmd = messageArray[0];
+    let args = messageArray.slice(1);
 
     if(cmd === `${PREFIX}report`){
 
         let rUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]))
-        if(!rUser) return message.channel.send("Can not find the member!")
+        if(!rUser) return message.channel.send("Kan de member niet vinden!")
         let reason = args.join(" ").slice(22);
     
         let reportEmbed = new Discord.RichEmbed()
         .setDescription("Report")
         .setColor("#15f153")
-        .addField("Reported Member", `${rUser} with the ID ${rUser.id}`)
-        .addField("Reported ny", `${message.author} with the ID ${message.author.id}`)
+        .addField("Reported Member", `${rUser} met ID ${rUser.id}`)
+        .addField("Reported Door", `${message.author} met ID ${message.author.id}`)
         .addField("Reported in", message.channel)
-        .addField("Reported Time", message.createdAt)
-        .addField("Reported Reason", reason);
+        .addField("Reported Tijd", message.createdAt)
+        .addField("Reported Reden", reason);
 
-        let reportschannel = message.guild.channels.find(`name`, "reports");
-        if(!reportschannel) return message.channel.send("Can not find the channel reports");
+        let reportschannel = message.guild.channels.find(`name`, "speler-reports");
+        if(!reportschannel) return message.channel.send("Kan de channel niet vinden");
 
         message.delete().catch(O_o=>{});
         reportschannel.send(reportEmbed);
 
-  }
+        return;
+    }
+    if(cmd === `${PREFIX}ban`){
+        let bUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
+        if(!bUser) return message.channel.send("Kan de member niet vinden");
+        let bReason = args.join(" ").slice(22);
+        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("Deze command is aleen voor staff!");
+        if(bUser.hasPermission("MANAGE_MESSAGES")) return message.channel.send("Die member mag je niet kicken")
 
+        let banEmbed = new Discord.RichEmbed()
+        .setDescription("Ban")
+        .setColor("#ff0000")
+        .addField("Banned Member", `${bUser} met ID ${bUser.id}`)
+        .addField("Banned door", `<@${message.author.id}> met ID ${message.author.id}`)
+        .addField("Banned in", message.channel)
+        .addField("Banned tijd", message.createdAt)
+        .addField("Banned reden", bReason);
+
+        let banChannel = message.guild.channels.find(`name`, "straffen-2");
+        if(!banChannel) return message.channel.send("Kan de channel straffen-2 niet vinden")
+
+        message.guild.member(bUser).ban(bReason);
+        message.delete().catch(O_o=>{});
+        banChannel.send(banEmbed)
+
+        return;
+
+    }
     if(cmd === `${PREFIX}kick`){
         let kUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
         if(!kUser) return message.channel.send("Kan de member niet vinden");
@@ -54,119 +76,156 @@ client.on("message", async message => {
         let kickEmbed = new Discord.RichEmbed()
         .setDescription("Kick")
         .setColor("#e56b00")
-        .addField("Kicked Member", `${kUser} with the ID ${kUser.id}`)
-        .addField("Kicked By", `<@${message.author.id}> with the ID ${message.author.id}`)
-        .addField("Kicked In", message.channel)
-        .addField("Kicked Time", message.createdAt)
-        .addField("Kicked Reason", kReason);
+        .addField("Kicked Member", `${kUser} met ID ${kUser.id}`)
+        .addField("Kicked door", `<@${message.author.id}> met ID ${message.author.id}`)
+        .addField("Kicked in", message.channel)
+        .addField("Kicked tijd", message.createdAt)
+        .addField("Kicked reden", kReason);
 
-        let kickChannel = message.guild.channels.find(`name`, "mod-log");
-        if(!kickChannel) return message.channel.send("Can not vind the channel mod-log")
+        let kickChannel = message.guild.channels.find(`name`, "straffen-2");
+        if(!kickChannel) return message.channel.send("Kan de channel straffen niet vinden")
 
         message.guild.member(kUser).kick(kReason);
         message.delete().catch(O_o=>{});
         kickChannel.send(kickEmbed);
 
-  }
-
-    if(cmd === `${PREFIX}ban`){
-        let bUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
-        if(!bUser) return message.channel.send("Can not find the member");
-        let bReason = args.join(" ").slice(22);
-        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("This command is only for staff");
-        if(bUser.hasPermission("MANAGE_MESSAGES")) return message.channel.send("That member can not be kicked")
-
-        let banEmbed = new Discord.RichEmbed()
-        .setDescription("Ban")
-        .setColor("#ff0000")
-        .addField("Banned Member", `${bUser} with the ID ${bUser.id}`)
-        .addField("Banned By", `<@${message.author.id}> with the ID ${message.author.id}`)
-        .addField("Banned In", message.channel)
-        .addField("Banned Time", message.createdAt)
-        .addField("Banned Reasom", bReason);
-
-        let banChannel = message.guild.channels.find(`name`, "mod-log");
-        if(!banChannel) return message.channel.send("Can not find the channel mod-log")
-
-        message.guild.member(bUser).ban(bReason);
-        message.delete().catch(O_o=>{});
-        banChannel.send(banEmbed)
-  }
-  if(command === "help") {
-      if (args[0] === "moderation") {
-        message.reply("Moderation help:")
-      } else { message.channel.send({embed: {
-          color: 0xFF0202,
-          author: {
-            name: client.user.username,
-            icon_url: client.user.avatarURL
-          },
-          fields: [{
-              name: "!help",
-              value: "Get this Message"
-            },
-            {
-              name: "!help moderation",
-              value: "Get all Moderation Commands"
-            },
-            {
-              name: "!help fun",
-              value: "Get Fun Commands"
-            },
-            {
-              name: "!help music",
-              value: "Get Music Commands",
-            },
-            {
-              name: "!help ranks",
-              value: "Get all rank commands"
-            }
-          ],
-          timestamp: new Date(),
-          footer: {
-            icon_url: client.user.avatarURL,
-            text: " TijdZone"
-          }
-        }
-      });}
+        return;
 
     }
-  if(command === "ping") {
-    const Discord = require('discord.js');
-    let embed = new Discord.RichEmbed()
+    if(cmd === `${PREFIX}warn`){
+        let wUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]))
+        if(!wUser) return message.channel.send("Het is !!warn <@member> <reden>")
+        let reason = args.join(" ").slice(22);
+        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("Deze command is aleen voor staff!");
+        if(wUser.hasPermission("MANAGE_MESSAGES")) return message.channel.send("Die member mag je niet warnen!")
+    
+        let warnEmbed = new Discord.RichEmbed()
+        .setDescription("Warn")
+        .setColor("#F1C40F")
+        .addField("Warned Member", `${wUser} met ID ${wUser.id}`)
+        .addField("Warned Door", `${message.author} met ID ${message.author.id}`)
+        .addField("Warned in", message.channel)
+        .addField("Warned Tijd", message.createdAt)
+        .addField("Warned Reden", reason);
 
-    .setColor(0xFF0202)
-    .addField(':ping_pong: Pong!', `Took: (**${Date.now() - message.createdTimestamp}**) ms\n1000 ms = 1 second`)
-    message.channel.send({embed});
-  }
-  if(command === "hosting") {
-     let role = message.guild.roles.find("name", "hosting");
-     message.guild.member(message.author).addRole(role).catch(console.error);
-       return message.reply("Je hebt nu de role Hosting!");
-   }
-  if(command === "userinfo") {
-    var user = message.mentions.member.first()
-    const status = {
-      online: "Online",
-      idle: "Idle",
-      dnd: "Do Not Disturb",
-      offline: "Offline/Invisible"
-    };
-    var embed2 = new Discord.RichEmbed()
-      .setColor(0xFF0202)
-      .addField("Full Username", `${message.author.username}#${message.author.discriminator}`)
-      if(!user) message.channel.send(embed2);
-  }
-  if(command === "purge") {
+        let warnchannel = message.guild.channels.find(`name`, "straffen-2");
+        if(!warnchannel) return message.channel.send("Kan de channel niet vinden");
 
-    const deleteCount = parseInt(args[0], 10);
+        message.delete().catch(O_o=>{});
+        warnchannel.send(warnEmbed);
 
-    if(!deleteCount || deleteCount < 2 || deleteCount > 100)
-      return message.reply("Please provide a number between 2 and 100 for the number of messages to delete");
-
-    const fetched = await message.channel.fetchMessages({count: deleteCount});
-    message.channel.bulkDelete(fetched)
-      .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
-
+        return;
+    }
 });
-client.login(process.env.BOT_TOKEN);
+bot.on('guildMemberAdd', member => {
+    const channel = member.guild.channels.find('name', 'welkom')
+    if (!channel) return;
+    channel.send(`Welkom op DieEneServer ${member} :wink: !`);
+});
+
+bot.on('guildMemberRemove', member => {
+    const channel = member.guild.channels.find('name', 'welkom')
+    if (!channel) return;
+    channel.send(`${member} Jammer dat je DieEneServer hebt verlaten :pensive: `);
+});
+
+bot.on("ready", async () => {
+    console.log("Ready");
+
+    bot.user.setActivity("Prefix !!", {type: "PLAYING"});
+});
+
+
+
+
+bot.on("message", function(message) {
+    if (message.author.equals(bot.user)) return;
+
+    if (!message.content.startsWith(PREFIX)) return;
+
+    var args = message.content.substring(PREFIX.length).split(" ");
+
+    switch (args[0].toLowerCase()) {
+        case "invite":
+        message.channel.send({embed:{
+            title: 'Dit is de discord invite link',
+            description: 'Deze link kan je naar mensen stuuren om ze te inviten https://discord.gg/zJNNRMk',
+            color: 0x2874A6,
+        }})
+            break;
+        case "website":
+         message.channel.send({embed:{
+            title: 'Dit is de link naar onze website',
+            description: 'Via deze link kan je naar onze website  http://dieeneserver.tk/forum/',
+            color: 0x2874A6,
+        }})
+                break;
+        case "ip":
+        message.channel.send({embed:{
+            title: 'Dit is de server ip',
+            description: 'De server ip is ``dieeneserver.chplay.nl``',
+            color: 0x2874A6,
+        }})
+            break;
+        case "commands":
+        message.channel.send({embed:{
+            title: 'Bot commands',
+            description: 'Hier kan je alle commands van de bot zien',
+            color: 0x2874A6,
+            fields:[
+                {
+                    name:'!!invite',
+                    value: 'Met deze commands krijg je de discord link waarmee je mensen kan invite ',
+                    inline: false
+                },
+                {
+                    name:'!!website ',
+                    value: 'Met deze command krijg je de website link ',
+                    inline: false
+                },
+                {
+                    name:'!!ip ',
+                    value: 'Als je de server ip niet hebt krijg je met deze command de ip',
+                    inline: false
+                },
+                {
+                    name:'!!report <@member> <reden> ',
+                    value: 'Met deze command kan je een speler reporten op hacks of andere dingen zoals schelden lever dan ook bewijs erbij een als je een bot report krijg je een warn. ',
+                    inline: false
+                },
+            ]
+            
+        }})
+            break;
+            case "staff-commands":
+            message.channel.send({embed:{
+                title: 'Staff commands',
+                description: 'Hier kan je alle commands van de bot zien voor de staff',
+                color: 0x2874A6,
+                fields:[
+                    {
+                        name:'!!warn <@member> <reden>',
+                        value: 'Met deze command kan je iemand warnen',
+                        inline: false
+                    },
+                    {
+                        name:'!!kick <@member> <reden>',
+                        value: 'Met deze command kan je iemand kicken',
+                        inline: false
+                    },
+                    {
+                        name:'!!ban <@member> <reden>',
+                        value: 'Met deze command kan je iemand bannen',
+                        inline: false
+                    },
+                ]
+                
+            }})
+                break;
+
+    }
+});
+
+
+
+bot.login(TOKEN);
