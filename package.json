@@ -1,13 +1,11 @@
 {
- "name": "DevelopBot",
- "description": "Developing",
- "version": "1.0",
- "main": "bot.js",
- "scripts": {
-   "start": "node bot.js"
- },
- "dependencies": {
-   "discord.js": "11.1.0",
-   "request": "2.01.0"
- }
+  "name": "developbot",
+  "version": "1.0.0",
+  "description": "develop",
+  "main": "bot.js",
+  "scripts": {
+    "test": "!test"
+  },
+  "author": "TijdZone",
+  "license": "ISC"
 }
